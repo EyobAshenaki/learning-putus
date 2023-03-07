@@ -315,7 +315,8 @@ propHasBlock2 = not (hasBlock 8 chain5)
 -- i.e., different from each other.
 
 uniqueBlocks :: Eq txs => Chain txs -> Bool
-uniqueBlocks = error "TODO: implement uniqueBlocks"
+uniqueBlocks GenesisBlock = True
+uniqueBlocks (Block c vtxs) = not (hasBlock vtxs c) && uniqueBlocks c
 
 propUniqueBlocks1 :: Bool
 propUniqueBlocks1 = uniqueBlocks (GenesisBlock :: Chain Int)
