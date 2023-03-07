@@ -448,7 +448,8 @@ propBalancesChain7 =
 -- intermediate balances are negative.
 
 validBalancesChain :: Chain Int -> Bool
-validBalancesChain = error "TODO: implement validBalancesChain"
+validBalancesChain GenesisBlock = True
+validBalancesChain c = not (hasBlockProp (< 0) (balancesChain c))
 
 propValidBalancesChain1 :: Bool
 propValidBalancesChain1 =
