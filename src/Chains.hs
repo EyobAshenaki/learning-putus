@@ -5,15 +5,15 @@ module Chains where
 -- manually reimplement some of the functions that would be given to you for
 -- free by having 'Foldable' derived.
 
-data Chain txs =
-    GenesisBlock
+data Chain txs
+  = GenesisBlock
   | Block (Chain txs) txs
   deriving (Show)
 
 eqChain :: Eq txs => Chain txs -> Chain txs -> Bool
-eqChain GenesisBlock    GenesisBlock    = True
+eqChain GenesisBlock GenesisBlock = True
 eqChain (Block c1 txs1) (Block c2 txs2) = eqChain c1 c2 && txs1 == txs2
-eqChain _               _               = False
+eqChain _ _ = False
 
 instance Eq txs => Eq (Chain txs) where
   (==) = eqChain
@@ -50,7 +50,8 @@ chains = [chain1, chain2, chain3, chain4]
 -- Compute the length of a 'Chain'.
 
 lengthChain :: Chain txs -> Int
-lengthChain = error "TODO: implement lengthChain"
+lengthChain GenesisBlock = 0
+lengthChain (Block c _) = 1 + lengthChain c
 
 propLengthChain1 :: Bool
 propLengthChain1 = lengthChain chain1 == 1
@@ -129,11 +130,13 @@ propLongerChain4 :: Bool
 propLongerChain4 = longerChain chain3 chain4 == chain3
 
 propLongerChain5 :: Bool
-propLongerChain5 = and [ propLongerChain1
-                       , propLengthChain2
-                       , propLengthChain3
-                       , propLengthChain4
-                       ]
+propLongerChain5 =
+  and
+    [ propLongerChain1,
+      propLengthChain2,
+      propLengthChain3,
+      propLengthChain4
+    ]
 
 -- Task Chains-5.
 --
@@ -185,12 +188,14 @@ propIsPrefixOf5 =
   all (GenesisBlock `isPrefixOf`) chains
 
 propIsPrefixOf6 :: Bool
-propIsPrefixOf6 = and [ propIsPrefixOf1
-                      , propIsPrefixOf2
-                      , propIsPrefixOf3
-                      , propIsPrefixOf4
-                      , propIsPrefixOf5
-                      ]
+propIsPrefixOf6 =
+  and
+    [ propIsPrefixOf1,
+      propIsPrefixOf2,
+      propIsPrefixOf3,
+      propIsPrefixOf4,
+      propIsPrefixOf5
+    ]
 
 -- Task Chains-7.
 --
@@ -220,16 +225,18 @@ propAreCompatible5 =
 -- All chains are compatible with the genesis block.
 propAreCompatible6 :: Bool
 propAreCompatible6 =
-  all (\ c -> areCompatible c GenesisBlock) chains
+  all (\c -> areCompatible c GenesisBlock) chains
 
 propAreCompatible7 :: Bool
-propAreCompatible7 = and [ propAreCompatible1
-                         , propAreCompatible2
-                         , propAreCompatible3
-                         , propAreCompatible4
-                         , propAreCompatible5
-                         , propAreCompatible6
-                         ]
+propAreCompatible7 =
+  and
+    [ propAreCompatible1,
+      propAreCompatible2,
+      propAreCompatible3,
+      propAreCompatible4,
+      propAreCompatible5,
+      propAreCompatible6
+    ]
 
 -- Task Chains-8.
 --
@@ -395,13 +402,15 @@ propBalancesChain6 =
   balancesChain chain6 == GenesisBlock |> 5 |> 0 |> (-1) |> 2
 
 propBalancesChain7 :: Bool
-propBalancesChain7 = and [ propBalancesChain1
-                         , propBalancesChain2
-                         , propBalancesChain3
-                         , propBalancesChain4
-                         , propBalancesChain5
-                         , propBalancesChain6
-                         ]
+propBalancesChain7 =
+  and
+    [ propBalancesChain1,
+      propBalancesChain2,
+      propBalancesChain3,
+      propBalancesChain4,
+      propBalancesChain5,
+      propBalancesChain6
+    ]
 
 -- Task Chains-16.
 --
@@ -421,9 +430,11 @@ propValidBalancesChain2 =
   not (validBalancesChain chain6)
 
 propValidBalancesChain3 :: Bool
-propValidBalancesChain3 = and [ propValidBalancesChain1
-                              , propValidBalancesChain2
-                              ]
+propValidBalancesChain3 =
+  and
+    [ propValidBalancesChain1,
+      propValidBalancesChain2
+    ]
 
 -- Task Chains-17.
 --
@@ -499,9 +510,10 @@ propCutPrefix4 :: Bool
 propCutPrefix4 = cutPrefix (-7) chain1 == GenesisBlock
 
 propCutPrefix5 :: Bool
-propCutPrefix5 = and [ propCutPrefix1
-                     , propCommonPrefix2
-                     , propCommonPrefix3
-                     , propCommonPrefix4
-                     ]
-
+propCutPrefix5 =
+  and
+    [ propCutPrefix1,
+      propCommonPrefix2,
+      propCommonPrefix3,
+      propCommonPrefix4
+    ]
