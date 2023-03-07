@@ -507,7 +507,7 @@ propBuild3 = build 3 == GenesisBlock |> 1 |> 2 |> 3
 -- genesis block.
 
 replicateChain :: Int -> txs -> Chain txs
-replicateChain = error "TODO: implement replicateChain"
+replicateChain len vtxs = if len > 0 then Block (replicateChain (len - 1) vtxs) vtxs else GenesisBlock
 
 propReplicateChain1 :: Bool
 propReplicateChain1 = replicateChain (-7) 'x' == GenesisBlock
