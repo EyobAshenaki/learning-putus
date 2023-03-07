@@ -173,7 +173,9 @@ propValidChain2 =
 -- to task 9.
 
 isPrefixOf :: Eq txs => Chain txs -> Chain txs -> Bool
-isPrefixOf = error "TODO: implement isPrefixOf"
+isPrefixOf GenesisBlock _ = True
+isPrefixOf _ GenesisBlock = False
+isPrefixOf c1 wholeC2@(Block c2 _) = c1 == wholeC2 || c1 == c2 || isPrefixOf c1 c2
 
 propIsPrefixOf1 :: Bool
 propIsPrefixOf1 = isPrefixOf chain1 chain2
