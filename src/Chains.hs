@@ -257,7 +257,11 @@ propAreCompatible7 =
 -- Given two chains, find the longest common prefix.
 
 commonPrefix :: Eq txs => Chain txs -> Chain txs -> Chain txs
-commonPrefix = error "TODO: implement commonPrefix"
+commonPrefix GenesisBlock _ = GenesisBlock
+commonPrefix _ GenesisBlock = GenesisBlock
+commonPrefix wholeC1@(Block c1 _) wholeC2@(Block c2 _)
+  | lengthChain wholeC1 <= lengthChain wholeC2 = if wholeC1 `isPrefixOf` wholeC2 then wholeC1 else commonPrefix c1 wholeC2
+  | otherwise = if wholeC2 `isPrefixOf` wholeC1 then wholeC2 else commonPrefix c2 wholeC1
 
 propCommonPrefix1 :: Bool
 propCommonPrefix1 = commonPrefix chain1 chain2 == chain1
