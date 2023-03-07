@@ -286,7 +286,8 @@ propCommonPrefix5 =
 -- in the type of transactions.
 
 hasBlockProp :: (txs -> Bool) -> Chain txs -> Bool
-hasBlockProp = error "TODO: implement hasBlockProp"
+hasBlockProp _ GenesisBlock = False
+hasBlockProp f (Block c vtxs) = f vtxs || hasBlockProp f c
 
 propHasBlockProp1 :: Bool
 propHasBlockProp1 = hasBlockProp even chain3
