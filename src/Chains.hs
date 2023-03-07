@@ -103,7 +103,8 @@ propSumChain5 =
 -- of an empty chain is 0.
 
 maxChain :: Chain Int -> Int
-maxChain = error "TODO: implement maxChain"
+maxChain GenesisBlock = 0
+maxChain (Block c n) = max n (maxChain c)
 
 propMaxChain :: Bool
 propMaxChain =
