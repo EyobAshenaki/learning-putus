@@ -336,7 +336,8 @@ propUniqueBlocks4 = not (uniqueBlocks (Block chain2 2))
 -- a particular property.
 
 allBlockProp :: (txs -> Bool) -> Chain txs -> Bool
-allBlockProp = error "TODO: implement allBlockProp"
+allBlockProp _ GenesisBlock = True
+allBlockProp f (Block c vtxs) = f vtxs && allBlockProp f c
 
 propAllBlockProp1 :: Bool
 propAllBlockProp1 = allBlockProp (== 'x') GenesisBlock
