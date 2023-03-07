@@ -397,7 +397,8 @@ propLongestCommonPrefix3 = longestCommonPrefix chain6 [chain5, chain5] == chain5
 -- the original chain at that point.
 
 balancesChain :: Chain Int -> Chain Int
-balancesChain = error "TODO: implement balancedChain"
+balancesChain GenesisBlock = GenesisBlock
+balancesChain wholeC@(Block c _) = Block (balancesChain c) (sumChain wholeC)
 
 propBalancesChain1 :: Bool
 propBalancesChain1 =
