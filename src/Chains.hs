@@ -75,7 +75,8 @@ propLengthChain5 =
 -- Sum all entries in an integer chain.
 
 sumChain :: Chain Int -> Int
-sumChain = error "TODO: implement sumChain"
+sumChain GenesisBlock = 0
+sumChain (Block c n) = n + sumChain c
 
 propSumChain1 :: Bool
 propSumChain1 = sumChain chain1 == 2
