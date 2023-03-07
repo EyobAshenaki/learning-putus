@@ -526,7 +526,11 @@ propReplicateChain3 = replicateChain 3 'x' == GenesisBlock |> 'x' |> 'x' |> 'x'
 -- return the genesis block only.
 
 cutPrefix :: Int -> Chain txs -> Chain txs
-cutPrefix = error "TODO: implement cutPrefix"
+cutPrefix _ GenesisBlock = GenesisBlock
+cutPrefix len wholeC@(Block c _)
+  | len <= 0 = GenesisBlock
+  | lengthChain wholeC <= len = wholeC
+  | otherwise = cutPrefix len c
 
 propCutPrefix1 :: Bool
 propCutPrefix1 = cutPrefix 1 chain2 == chain1
