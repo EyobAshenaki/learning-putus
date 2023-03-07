@@ -473,7 +473,8 @@ propValidBalancesChain3 =
 -- Return the rest.
 
 shortenWhile :: (txs -> Bool) -> Chain txs -> Chain txs
-shortenWhile = error "TODO: implement shortenWhile"
+shortenWhile _ GenesisBlock = GenesisBlock
+shortenWhile f wholeC@(Block c vtxs) = if f vtxs then shortenWhile f c else wholeC
 
 propShortenWhile1 :: Bool
 propShortenWhile1 = shortenWhile even chain2 == GenesisBlock
