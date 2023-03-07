@@ -117,7 +117,9 @@ propMaxChain =
 -- the first.
 
 longerChain :: Chain txs -> Chain txs -> Chain txs
-longerChain = error "TODO: implement longerChain"
+longerChain c1 c2
+  | lengthChain c1 >= lengthChain c2 = c1
+  | otherwise = c2
 
 propLongerChain1 :: Bool
 propLongerChain1 = longerChain chain1 chain2 == chain2
