@@ -300,7 +300,8 @@ propHasBlockProp2 = not (hasBlockProp odd chain2)
 -- Reimplement hasBlock in terms of hasBlockProp.
 
 hasBlock :: Eq txs => txs -> Chain txs -> Bool
-hasBlock = error "TODO: implement hasBlock"
+hasBlock _ GenesisBlock = False
+hasBlock vtxs (Block c vctxs) = vtxs == vctxs || hasBlock vtxs c
 
 propHasBlock1 :: Bool
 propHasBlock1 = hasBlock 8 chain4
