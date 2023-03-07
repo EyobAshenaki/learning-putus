@@ -150,7 +150,8 @@ propLongerChain5 =
 -- are positive.) Check that a given chain is valid.
 
 validChain :: Chain Int -> Bool
-validChain = error "TODO: implement validChain"
+validChain GenesisBlock = True
+validChain (Block c n) = n > maxChain c && validChain c
 
 propValidChain1 :: Bool
 propValidChain1 = validChain GenesisBlock
