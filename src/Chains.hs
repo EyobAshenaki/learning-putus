@@ -210,7 +210,14 @@ propIsPrefixOf6 =
 -- other.
 
 areCompatible :: Eq txs => Chain txs -> Chain txs -> Bool
-areCompatible = error "TODO: implement areCompatible"
+-- areCompatible GenesisBlock _ = True
+-- areCompatible _ GenesisBlock = True
+-- areCompatible c1 c2 = c1 `isPrefixOf` c2 || c2 `isPrefixOf` c1
+
+areCompatible c1 c2
+  | lengthChain c1 <= lengthChain c2 = c1 `isPrefixOf` c2
+  | lengthChain c1 > lengthChain c2 = c2 `isPrefixOf` c1
+  | otherwise = False
 
 propAreCompatible1 :: Bool
 propAreCompatible1 = areCompatible chain1 chain2
