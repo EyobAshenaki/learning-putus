@@ -1,9 +1,11 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
+
 module Datatypes where
 
 -- We hide functions we are going to redefine.
-import Prelude hiding ((++), or, reverse, filter)
-import Control.Applicative ((<|>), liftA2)
+
+import Control.Applicative (liftA2, (<|>))
+import Prelude hiding (filter, or, reverse, (++))
 
 -- Task Datatypes-1.
 --
@@ -24,9 +26,10 @@ import Control.Applicative ((<|>), liftA2)
 -- True
 -- >>> implies True False
 -- False
---
 implies :: Bool -> Bool -> Bool
-implies = error "TODO: define implies"
+implies a b
+  | a == True && b == False = False
+  | otherwise = True
 
 -- Task Datatypes-2.
 --
@@ -34,7 +37,9 @@ implies = error "TODO: define implies"
 -- of 'not' and '||', both of which are predefined.
 
 implies' :: Bool -> Bool -> Bool
-implies' = error "TODO: define implies'"
+implies' a b
+  | a == False = (not a || b)
+  | otherwise = if b == False then not (a || b) else (a || b)
 
 -- Task Datatypes-3.
 --
@@ -45,9 +50,9 @@ implies' = error "TODO: define implies'"
 -- Just 'x'
 -- >>> Just 2 `orelse` Just 3
 -- Just 2
---
 orelse :: Maybe a -> Maybe a -> Maybe a
-orelse = error "TODO: define orelse"
+orelse Nothing b = b
+orelse (Just a) _ = Just a
 
 -- Task Datatypes-4.
 --
@@ -56,9 +61,9 @@ orelse = error "TODO: define orelse"
 -- |
 -- >>> mapMaybe (+ 2) (Just 6)
 -- Just 8
---
 mapMaybe :: (a -> b) -> Maybe a -> Maybe b
-mapMaybe = error "TODO: define mapMaybe"
+mapMaybe _ Nothing = Nothing
+mapMaybe f (Just x) = Just (f x)
 
 -- Task Datatypes-5.
 --
@@ -91,9 +96,9 @@ mapMaybe = error "TODO: define mapMaybe"
 --
 -- >>> pairMaybe (Just 42) Nothing
 -- Nothing
---
 pairMaybe :: Maybe a -> Maybe b -> Maybe (a, b)
-pairMaybe = error "TODO: define pairMaybe"
+pairMaybe (Just a') (Just b') = Just (a', b')
+pairMaybe _ _ = Nothing
 
 -- Task Datatypes-8.
 --
@@ -105,16 +110,16 @@ pairMaybe = error "TODO: define pairMaybe"
 --
 -- >>> liftMaybe (*) (Just 7) Nothing
 -- Nothing
---
 liftMaybe :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
-liftMaybe = error "TODO: define liftMaybe"
+liftMaybe f (Just a') (Just b') = Just (f a' b')
+liftMaybe _ _ _ = Nothing
 
 -- Task Datatypes-9.
 --
 -- Reimplement 'pairMaybe' using 'liftMaybe'.
 
 pairMaybe' :: Maybe a -> Maybe b -> Maybe (a, b)
-pairMaybe' = error "TODO: define pairMaybe'"
+pairMaybe' a' b' = liftMaybe (\a b -> (a, b)) a' b'
 
 -- Task Datatypes-10.
 --
@@ -127,9 +132,8 @@ pairMaybe' = error "TODO: define pairMaybe'"
 --
 -- >>> addMaybes Nothing (Just 0)
 -- Nothing
---
 addMaybes :: Maybe Int -> Maybe Int -> Maybe Int
-addMaybes = error "TODO: define addMaybes"
+addMaybes a' b' = liftMaybe (+) a' b'
 
 -- Task Datatypes-11.
 --
@@ -167,7 +171,6 @@ addMaybes' = error "TODO: define addMaybes'"
 -- |
 -- >>> split (+ 1) (* 2) 7
 -- (8,14)
---
 split :: (a -> b) -> (a -> c) -> a -> (b, c)
 split = error "TODO: define split"
 
@@ -181,7 +184,6 @@ split = error "TODO: define split"
 --
 -- >>> "Mongolia" ++ "Haskell"
 -- "MongoliaHaskell"
---
 (++) :: [a] -> [a] -> [a]
 (++) = error "TODO: define (++)"
 
@@ -197,7 +199,6 @@ split = error "TODO: define split"
 --
 -- >>> or [False,True,False]
 -- True
---
 or :: [Bool] -> Bool
 or = error "TODO: define or"
 
@@ -222,7 +223,6 @@ reverse = error "TODO: define reverse"
 -- |
 -- >>> reverseAcc "Mongolia" "Haskell"
 -- "lleksaHMongolia"
---
 reverseAcc :: [a] -> [a] -> [a]
 reverseAcc = error "TODO: define reverseAcc"
 
@@ -258,7 +258,6 @@ reverse' = reverseAcc []
 -- |
 -- >>> filter even [1 .. 7]
 -- [2,4,6]
---
 filter :: (a -> Bool) -> [a] -> [a]
 filter = error "TODO: define filter"
 
@@ -276,7 +275,6 @@ filter = error "TODO: define filter"
 -- |
 -- >>> divisors 24
 -- [1,2,3,4,6,8,12,24]
---
 divisors :: Integral a => a -> [a]
 divisors = error "TODO: define divisors"
 
@@ -314,7 +312,6 @@ divisors = error "TODO: define divisors"
 --
 -- >>> isPrime 101
 -- True
---
 isPrime :: Integral a => a -> Bool
 isPrime = error "TODO: define isPrime"
 
@@ -336,7 +333,6 @@ isPrime = error "TODO: define isPrime"
 --
 -- >>> all isPrime thousandPrimes
 -- True
---
 thousandPrimes :: [Int]
 thousandPrimes = error "TODO: define thousandPrimes"
 
@@ -373,7 +369,6 @@ tree4 = Node tree2 tree3
 -- |
 -- >>> map height [tree1, tree2, tree3, tree4]
 -- [0,1,2,3]
---
 height :: Tree a -> Int
 height = error "TODO: implement height"
 
@@ -388,7 +383,6 @@ height = error "TODO: implement height"
 -- |
 -- >>> mapTree (+ 1) tree2
 -- Node (Leaf 3) (Leaf 5)
---
 mapTree :: (a -> b) -> Tree a -> Tree b
 mapTree = error "TODO: implement mapTree"
 
@@ -404,7 +398,6 @@ mapTree = error "TODO: implement mapTree"
 --
 -- sameShape tree3 (mapTree (* 10) tree3)
 -- True
---
 sameShape :: Tree a -> Tree b -> Bool
 sameShape = error "TODO: implement sameShape'"
 
@@ -442,7 +435,6 @@ sameShape' = error "TODO: implement sameShape'"
 --
 -- >>> buildTree 2
 -- Node (Node (Leaf ()) (Leaf ())) (Node (Leaf ()) (Leaf ()))
---
 buildTree :: Int -> Tree ()
 buildTree = error "TODO: implement buildTree"
 
@@ -456,7 +448,6 @@ buildTree = error "TODO: implement buildTree"
 -- |
 -- >>> graft (Node (Leaf (Leaf 'x')) (Leaf (Node (Leaf 'y') (Leaf 'z'))))
 -- Node (Leaf 'x') (Node (Leaf 'y') (Leaf 'z'))
---
 graft :: Tree (Tree a) -> Tree a
 graft = error "TODO: implement graft"
 
@@ -473,8 +464,8 @@ function t = graft (mapTree buildTree t)
 -- Re-implement the 'eval' function on expressions
 -- from the slides.
 
-data Expr =
-    Lit Int
+data Expr
+  = Lit Int
   | Add Expr Expr
   | Neg Expr
   | IfZero Expr Expr Expr
@@ -504,7 +495,6 @@ prop_eval2 = eval expr2 == 0
 -- |
 -- >>> sub (Lit 42) (Lit 2)
 -- Add (Lit 42) (Neg (Lit 2))
---
 sub :: Expr -> Expr -> Expr
 sub = error "TODO: implement sub"
 
@@ -520,7 +510,6 @@ sub = error "TODO: implement sub"
 --
 -- >>> countOps (Add (Lit 7) (Neg (Lit 5)))
 -- 2
---
 countOps :: Expr -> Int
 countOps = error "TODO: implement countOps"
 
