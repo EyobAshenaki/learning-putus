@@ -1,4 +1,14 @@
-module Tables where
+module Tables
+  ( Table (),
+    empty,
+    insert,
+    delete,
+    lookup,
+    mapValues,
+    mapKeys,
+    alter,
+  )
+where
 
 import Prelude hiding (lookup)
 
@@ -70,11 +80,15 @@ mapKeys f (Table ((k', v') : xs)) = insert (f k') v' (mapKeys f (Table xs))
 -- Implement a more general table update function.
 -- The function 'alter' takes a function and a key.
 
-alter :: Eq k => (Maybe v -> Maybe v) -> k -> Table k v -> Table k v
+fromMaybe :: a -> Maybe a -> a
+fromMaybe _ (Just x) = x
+fromMaybe x Nothing = x
+
+alter :: (Num v, Eq k) => (Maybe v -> Maybe v) -> k -> Table k v -> Table k v
 alter _ _ (Table []) = Table []
 alter f key (Table ((k', v') : xs))
-  | key == k' = insert k' (f v') (alter f key (Table xs))
-  | otherwise = alter f key (Table xs)
+  | key == k' = insert k' (fromMaybe 0 (f (Just v'))) (alter f key (Table xs))
+  | otherwise = insert k' v' (alter f key (Table xs))
 
 -- Task Tables-8.
 --
