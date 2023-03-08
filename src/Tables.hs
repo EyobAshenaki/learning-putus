@@ -16,28 +16,34 @@ newtype Table k v = Table [(k, v)]
 -- Re-implement 'empty'.
 
 empty :: Table k v
-empty = error "TODO: implement empty"
+empty = (Table [])
 
 -- Task Tables-2.
 --
 -- Re-implement 'insert'.
 
 insert :: k -> v -> Table k v -> Table k v
-insert = error "TODO: implement insert"
+insert k' v' (Table t) = Table ((k', v') : t)
 
 -- Task Tables-3.
 --
 -- Re-implement 'delete'.
 
 delete :: Eq k => k -> Table k v -> Table k v
-delete = error "TODO: implement delete"
+delete _ (Table []) = Table []
+delete k' t@(Table (x : xs))
+  | k' == (fst x) = delete k' (Table xs)
+  | otherwise = insert (fst x) (snd x) (delete k' (Table xs))
 
 -- Task Tables-4.
 --
 -- Re-implement 'lookup'.
 
 lookup :: Eq k => k -> Table k v -> Maybe v
-lookup = error "TODO: implement lookup"
+lookup _ (Table []) = Nothing
+lookup k' t@(Table (x : xs))
+  | k' == (fst x) = Just (snd x)
+  | otherwise = lookup k' (Table xs)
 
 -- Task Tables-5.
 --
