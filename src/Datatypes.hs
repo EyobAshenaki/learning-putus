@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unused-imports #-}
-
 module Datatypes where
 
 -- We hide functions we are going to redefine.
@@ -263,7 +261,10 @@ reverse' = reverseAcc []
 -- >>> filter even [1 .. 7]
 -- [2,4,6]
 filter :: (a -> Bool) -> [a] -> [a]
-filter = error "TODO: define filter"
+filter _ [] = []
+filter f (x : xs)
+  | f x = x : filter f xs
+  | otherwise = filter f xs
 
 -- Task Datatypes-22.
 --
@@ -280,7 +281,7 @@ filter = error "TODO: define filter"
 -- >>> divisors 24
 -- [1,2,3,4,6,8,12,24]
 divisors :: Integral a => a -> [a]
-divisors = error "TODO: define divisors"
+divisors n = filter (\x -> (n `mod` x == 0)) [1 .. n]
 
 -- Task Datatypes-23.
 --
@@ -317,7 +318,7 @@ divisors = error "TODO: define divisors"
 -- >>> isPrime 101
 -- True
 isPrime :: Integral a => a -> Bool
-isPrime = error "TODO: define isPrime"
+isPrime n = (length (divisors n)) == 2
 
 -- Task Datatypes-25.
 --
@@ -338,7 +339,7 @@ isPrime = error "TODO: define isPrime"
 -- >>> all isPrime thousandPrimes
 -- True
 thousandPrimes :: [Int]
-thousandPrimes = error "TODO: define thousandPrimes"
+thousandPrimes = take 1000 (filter isPrime [1 ..])
 
 -- After computing 'thousandPrimes' in GHCi once, compute
 -- it a second time. What do you observe?
