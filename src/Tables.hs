@@ -50,7 +50,8 @@ lookup k' t@(Table (x : xs))
 -- Implement a map function on the table values.
 
 mapValues :: (v1 -> v2) -> Table k v1 -> Table k v2
-mapValues = error "TODO: implement mapValues"
+mapValues _ (Table []) = Table []
+mapValues f (Table ((k', v') : xs)) = insert k' (f v') (mapValues f (Table xs))
 
 -- Task Tables-6.
 --
@@ -61,7 +62,8 @@ mapValues = error "TODO: implement mapValues"
 -- this function?
 
 mapKeys :: (k1 -> k2) -> Table k1 v -> Table k2 v
-mapKeys = error "TODO: implement mapKeys"
+mapKeys _ (Table []) = Table []
+mapKeys f (Table ((k', v') : xs)) = insert (f k') v' (mapKeys f (Table xs))
 
 -- Task Tables-7.
 --
@@ -69,7 +71,10 @@ mapKeys = error "TODO: implement mapKeys"
 -- The function 'alter' takes a function and a key.
 
 alter :: Eq k => (Maybe v -> Maybe v) -> k -> Table k v -> Table k v
-alter = error "TODO: implement alter"
+alter _ _ (Table []) = Table []
+alter f key (Table ((k', v') : xs))
+  | key == k' = insert k' (f v') (alter f key (Table xs))
+  | otherwise = alter f key (Table xs)
 
 -- Task Tables-8.
 --
