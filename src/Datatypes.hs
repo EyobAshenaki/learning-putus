@@ -132,7 +132,7 @@ pairMaybe' a' b' = liftMaybe (\a b -> (a, b)) a' b'
 --
 -- >>> addMaybes Nothing (Just 0)
 -- Nothing
-addMaybes :: Maybe Int -> Maybe Int -> Maybe Int
+-- addMaybes :: Maybe Int -> Maybe Int -> Maybe Int
 addMaybes a' b' = liftMaybe (+) a' b'
 
 -- Task Datatypes-11.
@@ -151,7 +151,7 @@ addMaybes a' b' = liftMaybe (+) a' b'
 -- 'mapMaybe'.
 
 addMaybes' :: Maybe Int -> Maybe Int -> Maybe Int
-addMaybes' = error "TODO: define addMaybes'"
+addMaybes' a' b' = mapMaybe (uncurry (+)) (pairMaybe a' b')
 
 -- Task Datatypes-13.
 --
@@ -172,7 +172,7 @@ addMaybes' = error "TODO: define addMaybes'"
 -- >>> split (+ 1) (* 2) 7
 -- (8,14)
 split :: (a -> b) -> (a -> c) -> a -> (b, c)
-split = error "TODO: define split"
+split f f' a' = (f a', f' a')
 
 -- Task Datatypes-15.
 --
@@ -185,7 +185,8 @@ split = error "TODO: define split"
 -- >>> "Mongolia" ++ "Haskell"
 -- "MongoliaHaskell"
 (++) :: [a] -> [a] -> [a]
-(++) = error "TODO: define (++)"
+(++) [] b = b
+(++) (a : as) b = a : (as ++ b)
 
 -- Task Datatypes-16.
 --
@@ -200,14 +201,16 @@ split = error "TODO: define split"
 -- >>> or [False,True,False]
 -- True
 or :: [Bool] -> Bool
-or = error "TODO: define or"
+or [] = False
+or (x : xs) = x || or xs
 
 -- Task Datatypes-17.
 --
 -- Reimplement the function 'reverse' from the slides.
 
 reverse :: [a] -> [a]
-reverse = error "TODO: define reverse"
+reverse [] = []
+reverse x = last x : reverse (init x)
 
 -- Task Datatypes-18.
 --
@@ -224,7 +227,8 @@ reverse = error "TODO: define reverse"
 -- >>> reverseAcc "Mongolia" "Haskell"
 -- "lleksaHMongolia"
 reverseAcc :: [a] -> [a] -> [a]
-reverseAcc = error "TODO: define reverseAcc"
+reverseAcc acc [] = acc
+reverseAcc acc (x : xs) = reverseAcc (x : acc) xs
 
 -- Task Datatypes-19.
 --
