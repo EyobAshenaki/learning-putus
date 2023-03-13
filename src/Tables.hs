@@ -7,6 +7,7 @@ module Tables
     mapValues,
     mapKeys,
     alter,
+    fromMaybe,
   )
 where
 
@@ -41,7 +42,7 @@ insert k' v' (Table t) = Table ((k', v') : t)
 
 delete :: Eq k => k -> Table k v -> Table k v
 delete _ (Table []) = Table []
-delete k' t@(Table (x : xs))
+delete k' (Table (x : xs))
   | k' == (fst x) = delete k' (Table xs)
   | otherwise = insert (fst x) (snd x) (delete k' (Table xs))
 
@@ -51,7 +52,7 @@ delete k' t@(Table (x : xs))
 
 lookup :: Eq k => k -> Table k v -> Maybe v
 lookup _ (Table []) = Nothing
-lookup k' t@(Table (x : xs))
+lookup k' (Table (x : xs))
   | k' == (fst x) = Just (snd x)
   | otherwise = lookup k' (Table xs)
 
@@ -83,6 +84,9 @@ mapKeys f (Table ((k', v') : xs)) = insert (f k') v' (mapKeys f (Table xs))
 fromMaybe :: a -> Maybe a -> a
 fromMaybe _ (Just x) = x
 fromMaybe x Nothing = x
+
+-- alter (\(Just x) -> (Just (x*2))) 2 (insert 4 5 (insert 2 3 empty))
+-- Table [(4,5),(2,6)]
 
 alter :: (Num v, Eq k) => (Maybe v -> Maybe v) -> k -> Table k v -> Table k v
 alter _ _ (Table []) = Table []

@@ -1,22 +1,22 @@
 module Transactions where
 
-import Prelude hiding (lookup)
 import Tables
+import Prelude hiding (lookup)
 
 -- START HERE AFTER Tables.hs
 
 -- This is the transactions datatype from the slides,
 -- using record syntax.
 
-data Transaction =
-  Transaction
-    { trAmount :: Amount
-    , trFrom   :: Account
-    , trTo     :: Account
-    }
+data Transaction = Transaction
+  { trAmount :: Amount,
+    trFrom :: Account,
+    trTo :: Account
+  }
   deriving (Eq, Show)
 
-type Amount  = Int
+type Amount = Int
+
 type Account = String
 
 -- Both declarations below define transactions. The
@@ -33,9 +33,9 @@ transaction1 = Transaction 10 "Andres" "Lars"
 transaction2 :: Transaction
 transaction2 =
   Transaction
-    { trAmount = 7
-    , trFrom   = "Lars"
-    , trTo     = "Philipp"
+    { trAmount = 7,
+      trFrom = "Lars",
+      trTo = "Alejandro"
     }
 
 -- Task Transactions-1.
@@ -46,9 +46,8 @@ transaction2 =
 -- |
 -- >>> flipTransaction transaction1
 -- Transaction {trAmount = -10, trFrom = "Lars", trTo = "Andres"}
---
 flipTransaction :: Transaction -> Transaction
-flipTransaction = error "TODO: implement flipTransaction"
+flipTransaction (Transaction amt f t) = Transaction (-10) t f
 
 -- Task Transactions-2.
 --
@@ -56,7 +55,7 @@ flipTransaction = error "TODO: implement flipTransaction"
 -- if the transaction amount is negative.
 
 normalizeTransaction :: Transaction -> Transaction
-normalizeTransaction = error "TODO: impement normalizeTransaction"
+normalizeTransaction txs@(Transaction amt f t) = if amt < 0 then flipTransaction (Transaction amt f t) else (Transaction amt f t)
 
 -- Task Transactions-3.
 --
@@ -64,6 +63,7 @@ normalizeTransaction = error "TODO: impement normalizeTransaction"
 -- but use the function 'alter' that you defined in
 -- the Tables tasks.
 
+-- Account -> String, Amount -> Int
 type Accounts = Table Account Amount
 
 -- |
@@ -79,9 +79,11 @@ type Accounts = Table Account Amount
 -- Just 3
 -- >>> lookup "Alejandro" b
 -- Just 7
---
 processTransaction :: Transaction -> Accounts -> Accounts
-processTransaction = error "TODO: implement processTransaction"
+processTransaction (Transaction amt from to) accounts =
+  let fromOld = fromMaybe 0 (lookup from accounts)
+      toOld = fromMaybe 0 (lookup to accounts)
+   in insert from (fromOld - amt) (insert to (toOld + amt) accounts)
 
 -- Task Transactions-4.
 --
@@ -102,9 +104,9 @@ processTransaction = error "TODO: implement processTransaction"
 -- Just 3
 -- >>> lookup "Alejandro" a
 -- Just 7
---
 processTransactions :: [Transaction] -> Accounts -> Accounts
-processTransactions = error "TODO: implement processTransactions"
+processTransactions [] accounts = accounts
+processTransactions (t : ts) accounts = processTransactions ts (processTransaction t accounts)
 
 -- Task Transactions-6.
 --
@@ -120,7 +122,6 @@ processTransactions = error "TODO: implement processTransactions"
 --
 -- >>> processTransaction' transaction1 empty
 -- Nothing
---
 processTransaction' :: Transaction -> Accounts -> Maybe Accounts
 processTransaction' = error "TODO: implement processTransaction'"
 
@@ -140,7 +141,6 @@ processTransaction' = error "TODO: implement processTransaction'"
 --
 -- >>> processTransactions' [transaction1, transaction2] empty
 -- Nothing
---
 processTransactions' :: [Transaction] -> Accounts -> Maybe Accounts
 processTransactions' = error "TODO: implement processTransactions'"
 
