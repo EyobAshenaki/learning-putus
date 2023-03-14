@@ -123,11 +123,14 @@ processTransactions (t : ts) accounts = processTransactions ts (processTransacti
 -- >>> processTransaction' transaction1 empty
 -- Nothing
 processTransaction' :: Transaction -> Accounts -> Maybe Accounts
-processTransaction' = error "TODO: implement processTransaction'"
+processTransaction' (Transaction amt from to) accounts =
+  let fromOld = fromMaybe 0 (lookup from accounts)
+      toOld = fromMaybe 0 (lookup to accounts)
+   in if fromOld >= amt then Just (insert from (fromOld - amt) (insert to (toOld + amt) accounts)) else Nothing
 
 -- Task Transactions-7.
 --
--- Write a versionof 'processTransactions' that fails
+-- Write a version of 'processTransactions' that fails
 -- if any of the individual transactions fail.
 
 -- |
@@ -142,7 +145,8 @@ processTransaction' = error "TODO: implement processTransaction'"
 -- >>> processTransactions' [transaction1, transaction2] empty
 -- Nothing
 processTransactions' :: [Transaction] -> Accounts -> Maybe Accounts
-processTransactions' = error "TODO: implement processTransactions'"
+processTransactions' [] accounts = Just accounts
+processTransactions' (t : ts) accounts = let txs = processTransaction' t accounts in if txs == Nothing then Nothing else Just (processTransactions ts (processTransaction t accounts))
 
 -- Task Transactions-8.
 --

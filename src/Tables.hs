@@ -16,7 +16,7 @@ import Prelude hiding (lookup)
 -- START HERE AFTER reaching the pointer in Datatypes.hs
 
 newtype Table k v = Table [(k, v)]
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- In the following, we first reimplement the functions
 -- from the slides, but with the @newtype@-based version
