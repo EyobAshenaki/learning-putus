@@ -1,6 +1,7 @@
 module Transactions where
 
-import Tables
+import qualified Data.Map as M
+-- import Tables
 import Prelude hiding (lookup)
 
 -- START HERE AFTER Tables.hs
@@ -64,7 +65,12 @@ normalizeTransaction txs@(Transaction amt f t) = if amt < 0 then flipTransaction
 -- the Tables tasks.
 
 -- Account -> String, Amount -> Int
-type Accounts = Table Account Amount
+-- type Accounts = Table Account Amount
+type Accounts = M.Map String Int
+
+fromMaybe :: a -> Maybe a -> a
+fromMaybe _ (Just x) = x
+fromMaybe x Nothing = x
 
 -- |
 -- >>> let a = processTransaction transaction1 $ insert "Andres" 30 empty
@@ -81,9 +87,9 @@ type Accounts = Table Account Amount
 -- Just 7
 processTransaction :: Transaction -> Accounts -> Accounts
 processTransaction (Transaction amt from to) accounts =
-  let fromOld = fromMaybe 0 (lookup from accounts)
-      toOld = fromMaybe 0 (lookup to accounts)
-   in insert from (fromOld - amt) (insert to (toOld + amt) accounts)
+  let fromOld = fromMaybe 0 (M.lookup from accounts)
+      toOld = fromMaybe 0 (M.lookup to accounts)
+   in M.insert from (fromOld - amt) (M.insert to (toOld + amt) accounts)
 
 -- Task Transactions-4.
 --
@@ -124,9 +130,9 @@ processTransactions (t : ts) accounts = processTransactions ts (processTransacti
 -- Nothing
 processTransaction' :: Transaction -> Accounts -> Maybe Accounts
 processTransaction' (Transaction amt from to) accounts =
-  let fromOld = fromMaybe 0 (lookup from accounts)
-      toOld = fromMaybe 0 (lookup to accounts)
-   in if fromOld >= amt then Just (insert from (fromOld - amt) (insert to (toOld + amt) accounts)) else Nothing
+  let fromOld = fromMaybe 0 (M.lookup from accounts)
+      toOld = fromMaybe 0 (M.lookup to accounts)
+   in if fromOld >= amt then Just (M.insert from (fromOld - amt) (M.insert to (toOld + amt) accounts)) else Nothing
 
 -- Task Transactions-7.
 --
