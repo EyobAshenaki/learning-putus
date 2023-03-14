@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveFoldable #-}
+
 module Datatypes where
 
 -- We hide functions we are going to redefine.
@@ -349,7 +351,7 @@ thousandPrimes = take 1000 (filter isPrime [1 ..])
 -- RETURN HERE from Transactions.hs
 
 data Tree a = Leaf a | Node (Tree a) (Tree a)
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord, Foldable)
 
 tree1 :: Tree Int
 tree1 = Leaf 1
@@ -374,8 +376,17 @@ tree4 = Node tree2 tree3
 -- |
 -- >>> map height [tree1, tree2, tree3, tree4]
 -- [0,1,2,3]
-height :: Tree a -> Int
-height = error "TODO: implement height"
+-- height :: Tree a -> Int
+-- height = go 0
+--   where
+--     go acc (Leaf _) = acc
+--     go acc (Node leftT rightT) = max (go (acc + 1) leftT) (go (acc + 1) rightT)
+height :: (Ord a) => Tree a -> Int
+height (Leaf _) = 0
+height (Node leftT rightT) =
+  if leftT > rightT
+    then height leftT + 1
+    else height rightT + 1
 
 -- Task Datatypes-30.
 --
@@ -389,7 +400,8 @@ height = error "TODO: implement height"
 -- >>> mapTree (+ 1) tree2
 -- Node (Leaf 3) (Leaf 5)
 mapTree :: (a -> b) -> Tree a -> Tree b
-mapTree = error "TODO: implement mapTree"
+mapTree f (Leaf value) = Leaf (f value)
+mapTree f (Node leftT rightT) = Node (mapTree f leftT) (mapTree f rightT)
 
 -- Task Datatypes-31.
 --
@@ -404,7 +416,10 @@ mapTree = error "TODO: implement mapTree"
 -- sameShape tree3 (mapTree (* 10) tree3)
 -- True
 sameShape :: Tree a -> Tree b -> Bool
-sameShape = error "TODO: implement sameShape'"
+sameShape (Leaf _) (Node _ _) = False
+sameShape (Node _ _) (Leaf _) = False
+sameShape (Leaf _) (Leaf _) = True
+sameShape (Node leftT1 rightT1) (Node leftT2 rightT2) = sameShape leftT1 leftT2 && sameShape rightT1 rightT2
 
 -- Task Datatypes-32.
 --
@@ -423,7 +438,7 @@ sameShape = error "TODO: implement sameShape'"
 --   () :: ()
 
 sameShape' :: Tree a -> Tree b -> Bool
-sameShape' = error "TODO: implement sameShape'"
+sameShape' tree1 tree2 = mapTree (const ()) tree1 == mapTree (const ()) tree2
 
 -- Task Datatypes-33.
 --
@@ -441,7 +456,9 @@ sameShape' = error "TODO: implement sameShape'"
 -- >>> buildTree 2
 -- Node (Node (Leaf ()) (Leaf ())) (Node (Leaf ()) (Leaf ()))
 buildTree :: Int -> Tree ()
-buildTree = error "TODO: implement buildTree"
+buildTree n
+  | n <= 0 = Leaf ()
+  | otherwise = Node (buildTree (n - 1)) (buildTree (n - 1))
 
 -- Task Datatypes-34.
 --
@@ -454,13 +471,20 @@ buildTree = error "TODO: implement buildTree"
 -- >>> graft (Node (Leaf (Leaf 'x')) (Leaf (Node (Leaf 'y') (Leaf 'z'))))
 -- Node (Leaf 'x') (Node (Leaf 'y') (Leaf 'z'))
 graft :: Tree (Tree a) -> Tree a
-graft = error "TODO: implement graft"
+graft (Leaf tree) = tree
+graft (Node leftT rightT) = Node (graft leftT) (graft rightT)
 
 -- Task Datatypes-35.
 --
 -- Explain in words what the following
 -- function does.
 
+-- ** Answer
+
+-- This function takes tree of Int numbers and
+-- builds a nested tree of unit/void for each number
+-- in the tree and grafts it (remove the unnecessary
+-- nested leafs) and returns a tree of nested unit/void
 function :: Tree Int -> Tree ()
 function t = graft (mapTree buildTree t)
 
@@ -483,7 +507,10 @@ expr2 :: Expr
 expr2 = IfZero expr1 (Lit 1) (Lit 0)
 
 eval :: Expr -> Int
-eval = error "TODO: implement eval"
+eval (Lit n) = n
+eval (Add e1 e2) = eval e1 + eval e2
+eval (Neg p) = -(eval p)
+eval (IfZero e eT eF) = if eval e == 0 then eval eT else eval eF
 
 prop_eval1 :: Bool
 prop_eval1 = eval expr1 == -8
@@ -501,7 +528,7 @@ prop_eval2 = eval expr2 == 0
 -- >>> sub (Lit 42) (Lit 2)
 -- Add (Lit 42) (Neg (Lit 2))
 sub :: Expr -> Expr -> Expr
-sub = error "TODO: implement sub"
+sub exp1 exp2 = Add exp1 (Neg exp2)
 
 -- Task Datatypes-38.
 --
@@ -516,7 +543,10 @@ sub = error "TODO: implement sub"
 -- >>> countOps (Add (Lit 7) (Neg (Lit 5)))
 -- 2
 countOps :: Expr -> Int
-countOps = error "TODO: implement countOps"
+countOps (Lit _) = 0
+countOps (Add exp1 exp2) = 1 + countOps exp1 + countOps exp2
+countOps (Neg exp) = 1 + countOps exp
+countOps (IfZero expIf expT expF) = 1 + countOps expIf + countOps expT + countOps expF
 
 -- Task Datatypes-39.
 --
