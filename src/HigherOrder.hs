@@ -1,13 +1,14 @@
 {-# OPTIONS_GHC -Wall -Wno-unused-imports #-}
+
 module HigherOrder where
 
-import Data.List (foldl')
-import Prelude hiding (take, product, reverse)
+import Data.List (foldl', sortBy)
+import Prelude hiding (all, product, reverse, take)
 
 -- These are binary trees with labels in their nodes.
 
-data BinTree a =
-    Bin (BinTree a) a (BinTree a)
+data BinTree a
+  = Bin (BinTree a) a (BinTree a)
   | Empty
   deriving (Eq, Show)
 
@@ -19,23 +20,24 @@ data BinTree a =
 -- |
 -- >>> product [1 .. 4]
 -- 24
---
 product :: Num a => [a] -> a
-product = error "TODO: define product with an explicit accumulator"
+product = go 1
+  where
+    go acc [] = acc
+    go acc (x : xs) = go (acc * x) xs
 
 -- |
 -- >>> product [3, 11]
 -- 33
---
 product' :: Num a => [a] -> a
-product' = error "TODO: define product using foldl'"
+product' = foldl' (*) 1
 
 -- Task HigherOrder-2.
 --
 -- Define 'reverse' using 'foldl'.
 
 reverse :: [a] -> [a]
-reverse = error "TODO: define reverse"
+reverse xs = foldl' (\acc x -> x : acc) [] xs
 
 -- Task HigherOrder-3.
 --
@@ -49,14 +51,12 @@ reverse = error "TODO: define reverse"
 -- |
 -- >>> mapBinTree (+1) (Bin Empty 7 (Bin Empty 8 Empty))
 -- Bin Empty 8 (Bin Empty 9 Empty)
---
 mapBinTree :: (a -> b) -> BinTree a -> BinTree b
-mapBinTree = error "TODO: define mapBinTree"
+mapBinTree _ Empty = Empty
+mapBinTree f (Bin btree1 val btree2) = Bin (mapBinTree f btree1) (f val) (mapBinTree f btree2)
 
-{-
 instance Functor BinTree where
   fmap = mapBinTree
--}
 
 -- Task HigherOrder-4.
 --
@@ -72,7 +72,11 @@ instance Functor BinTree where
 -- is a binary search tree.
 
 isBST :: Ord a => BinTree a -> Bool
-isBST = error "TODO: define isBST"
+isBST Empty = True
+isBST (Bin Empty _ Empty) = True
+isBST (Bin Empty val rightBT@(Bin _ rightVal _)) = val < rightVal && isBST rightBT
+isBST (Bin leftBT@(Bin _ leftVal _) val Empty) = leftVal < val && isBST leftBT
+isBST (Bin leftBT@(Bin _ leftVal _) val rightBT@(Bin _ rightVal _)) = leftVal < val && val < rightVal && isBST leftBT && isBST rightBT
 
 -- Task HigherOrder-5.
 --
@@ -85,7 +89,11 @@ isBST = error "TODO: define isBST"
 type BST a = BinTree a
 
 search :: Ord a => a -> BST a -> Bool
-search = error "TODO: define search"
+search _ Empty = False
+search sVal (Bin leftBST val rightBST)
+  | sVal < val = search sVal leftBST
+  | sVal > val = search sVal rightBST
+  | otherwise = True
 
 -- Task HigherOrder-6.
 --
@@ -95,7 +103,11 @@ search = error "TODO: define search"
 -- maintain the BST property itself.)
 
 insert :: Ord a => a -> BST a -> BST a
-insert = error "TODO: define insert"
+insert iVal Empty = Bin Empty iVal Empty
+insert iVal bst@(Bin leftBST val rightBST)
+  | iVal < val = Bin (insert iVal leftBST) val rightBST
+  | iVal > val = Bin leftBST val (insert iVal rightBST)
+  | otherwise = bst
 
 -- Task HigherOrder-7.
 --
@@ -109,8 +121,8 @@ insert = error "TODO: define insert"
 --
 -- >>> all odd [1, 1, 1, 2, 3, 3]
 -- False
---
--- TODO: define all
+all :: (a -> Bool) -> [a] -> Bool
+all f = foldr (\x acc -> acc && f x) True
 
 -- Task HigherOrder-8.
 --
@@ -119,14 +131,23 @@ insert = error "TODO: define insert"
 -- list in descending rather than ascending order.
 
 sortDescending :: Ord a => [a] -> [a]
-sortDescending = error "TODO: define sortDescending"
+sortDescending = sortBy (flip compare)
+
+-- sortDescending = sortBy (\x y -> compare' y x)
+-- compare' :: Ord a => a -> a -> Ordering
+-- compare' x y
+--   | x > y = GT
+--   | x < y = LT
+--   | otherwise = EQ
 
 -- Task HigherOrder-9.
 --
 -- Use 'insert' and 'foldr' to create a BST from a list.
 
 fromListBST :: Ord a => [a] -> BST a
-fromListBST = error "TODO: define fromListBST"
+fromListBST = foldr insert Empty
+
+-- fromListBST = foldr (\x acc -> insert x acc) Empty
 
 -- Task HigherOrder-10.
 --
@@ -143,7 +164,6 @@ fromListBST = error "TODO: define fromListBST"
 --
 -- >>> labelTree $ Bin (Bin Empty 1 Empty) 2 (Bin Empty 5 Empty)
 -- Bin (Bin Empty (1,1) Empty) (2,2) (Bin Empty (5,3) Empty)
---
 labelTree :: BinTree a -> BinTree (a, Int)
 labelTree = error "TODO: define labelTree"
 
@@ -160,7 +180,6 @@ labelTree = error "TODO: define labelTree"
 -- |
 -- >>> labelTree' (Bin Empty 1 (Bin Empty 42 Empty)) "Haskell"
 -- Bin Empty (1,'H') (Bin Empty (42,'a') Empty)
---
 labelTree' :: BinTree a -> [b] -> BinTree (a, b)
 labelTree' = error "TODO: define labelTree'"
 
@@ -187,11 +206,10 @@ labelTree' = error "TODO: define labelTree'"
 -- |
 -- >>> take 3 "Haskell"
 -- "Has"
---
 take :: Int -> [a] -> [a]
-take _ []       = []
+take _ [] = []
 take n (x : xs)
-  | n > 0     = x : take (n - 1) xs
+  | n > 0 = x : take (n - 1) xs
   | otherwise = []
 
 -- Task HigherOrder-14.
@@ -205,7 +223,6 @@ take n (x : xs)
 -- |
 -- >>> myFoldl (\xs x -> xs ++ [x]) [] "Haskell"
 -- "Haskell"
---
 myFoldl :: (b -> a -> b) -> b -> [a] -> b
 myFoldl = error "TODO: implement myFoldl"
 
