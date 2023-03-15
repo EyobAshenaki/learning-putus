@@ -498,7 +498,14 @@ data Expr
   | Add Expr Expr
   | Neg Expr
   | IfZero Expr Expr Expr
-  deriving (Eq, Show)
+  deriving (Eq)
+
+instance Show Expr where
+  show :: Expr -> String
+  show (Lit n) = show n
+  show (Add exp1 exp2) = "(" ++ show exp1 ++ " + " ++ show exp2 ++ ")"
+  show (Neg exp) = "- " ++ show exp
+  show (IfZero expIf expT expF) = "ifzero " ++ show expIf ++ " then " ++ show expT ++ " else " ++ show expF
 
 expr1 :: Expr
 expr1 = Neg (Add (Lit 3) (Lit 5))
