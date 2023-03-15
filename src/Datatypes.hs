@@ -498,6 +498,7 @@ data Expr
   | Add Expr Expr
   | Neg Expr
   | IfZero Expr Expr Expr
+  | Mul Expr Expr
   deriving (Eq)
 
 instance Show Expr where
@@ -506,6 +507,7 @@ instance Show Expr where
   show (Add exp1 exp2) = "(" ++ show exp1 ++ " + " ++ show exp2 ++ ")"
   show (Neg exp) = "- " ++ show exp
   show (IfZero expIf expT expF) = "ifzero " ++ show expIf ++ " then " ++ show expT ++ " else " ++ show expF
+  show (Mul expm1 expm2) = "(" ++ show expm1 ++ " * " ++ show expm2 ++ ")"
 
 expr1 :: Expr
 expr1 = Neg (Add (Lit 3) (Lit 5))
@@ -518,6 +520,7 @@ eval (Lit n) = n
 eval (Add e1 e2) = eval e1 + eval e2
 eval (Neg p) = -(eval p)
 eval (IfZero e eT eF) = if eval e == 0 then eval eT else eval eF
+eval (Mul em1 em2) = eval em1 * eval em2
 
 prop_eval1 :: Bool
 prop_eval1 = eval expr1 == -8
@@ -554,6 +557,7 @@ countOps (Lit _) = 0
 countOps (Add exp1 exp2) = 1 + countOps exp1 + countOps exp2
 countOps (Neg exp) = 1 + countOps exp
 countOps (IfZero expIf expT expF) = 1 + countOps expIf + countOps expT + countOps expF
+countOps (Mul expm1 expm2) = 1 + countOps expm1 + countOps expm2
 
 -- Task Datatypes-39.
 --
