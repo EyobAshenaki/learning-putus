@@ -145,9 +145,11 @@ sortDescending = sortBy (flip compare)
 -- Use 'insert' and 'foldr' to create a BST from a list.
 
 fromListBST :: Ord a => [a] -> BST a
-fromListBST = foldr insert Empty
-
+-- fromListBST = foldr insert Empty
 -- fromListBST = foldr (\x acc -> insert x acc) Empty
+
+-- fromListBST = foldl (\acc x -> insert x acc) Empty
+fromListBST = foldl (flip insert) Empty
 
 -- Task HigherOrder-10.
 --
@@ -164,8 +166,83 @@ fromListBST = foldr insert Empty
 --
 -- >>> labelTree $ Bin (Bin Empty 1 Empty) 2 (Bin Empty 5 Empty)
 -- Bin (Bin Empty (1,1) Empty) (2,2) (Bin Empty (5,3) Empty)
-labelTree :: BinTree a -> BinTree (a, Int)
-labelTree = error "TODO: define labelTree"
+
+{-
+  ? First approach
+  * First change the values in the BinTree to list and
+  * use 'zip' to zip them with infinite integer list to
+  * make a list of tuples then search and replace the
+  * the values in the BinTree with the zipped list
+
+  ? Second approach
+  * First change the values in the BinTree to list and
+  * use 'zip' to zip them with infinite integer list to
+  * make a list of tuples then make a new BinTree with
+  * the zipped list
+-}
+
+-- *** The First approach
+
+labelTree :: Eq a => BinTree a -> BinTree (a, Int)
+labelTree binTree = replaceWithTupleFromList binTree (zip (btToList binTree) [1 ..])
+
+btToList :: BinTree a -> [a]
+btToList Empty = []
+btToList (Bin leftBT val rightBT) = btToList leftBT ++ [val] ++ btToList rightBT
+
+replace :: Eq a => (a, Int) -> BinTree (a, Int) -> BinTree (a, Int)
+replace _ Empty = Empty
+replace x@(rVal, _) (Bin leftBT wholeV@(val, _) rightBT)
+  | rVal == val = Bin leftBT x rightBT
+  | otherwise = Bin (replace x leftBT) wholeV (replace x rightBT)
+
+fillWithTuple :: BinTree a -> BinTree (a, Int)
+fillWithTuple Empty = Empty
+fillWithTuple (Bin leftBT val rightBT) = Bin (fillWithTuple leftBT) (val, 0) (fillWithTuple rightBT)
+
+replaceWithTupleFromList :: Eq a => BinTree a -> [(a, Int)] -> BinTree (a, Int)
+replaceWithTupleFromList binTree [] = fillWithTuple binTree
+replaceWithTupleFromList binTree xs = foldr replace (fillWithTuple binTree) xs
+
+-- replaceWithTupleFromList binTree (x : xs) = replaceWithTupleFromList (replace x binTree) xs
+
+-- *** The Second approach
+
+-- labelTree'' :: Ord a => BinTree a -> BinTree (a, Int)
+-- labelTree'' binTree = fromListBST (zip (btToList binTree) [1 ..])
+
+-- labelTree'' binTree = createBinTree (zip (btToList binTree) [1 ..])
+
+-- createBinTree :: [(a, Int)] -> BinTree (a, Int)
+-- createBinTree = insertBinTree Empty
+--   where
+--     insertBinTree acc [] = acc
+--     insertBinTree acc@(Bin leftBT val@(_, n) rightBT) (x@(_, n1) : xs)
+--       | n1 < n = insertBinTree (Bin ((replace x leftBT) val rightBT)) xs
+--       | n1 > n = insertBinTree (Bin (leftBT val (replace x rightBT))) xs
+--       | otherwise = insertBinTree acc
+
+------ More concise and readable version of createBinTree fun above
+-- createBinTree' :: [(a, Int)] -> BinTree (a, Int)
+-- createBinTree' = foldr insertBinTree Empty
+--   where
+--     insertBinTree x Empty = Bin Empty x Empty
+--     insertBinTree x@(_, n1) (Bin leftBT val@(_, n) rightBT)
+--       | n1 < n = Bin (insertBinTree x leftBT) val rightBT
+--       | n1 > n = Bin leftBT val (insertBinTree x rightBT)
+--       | otherwise = Bin leftBT val rightBT
+
+------ The above createBinTree fun is the same as fromList fun using foldl
+-- fromListBST :: Ord a => [a] -> BST a
+-- -- fromListBST = foldl (\acc x -> insert x acc) Empty
+-- fromListBST = foldl (flip insert) Empty
+
+{-
+  * In conclusion, although the second approach worked in changing the
+  * the values to tuples with the correct values, but it could not reproduce
+  * the actual structure of the input BinTree. However the FIRST approach,
+  * even tough it's less efficient, works like a charm.
+-}
 
 -- Task HigherOrder-11.
 --
