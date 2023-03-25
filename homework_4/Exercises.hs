@@ -48,11 +48,12 @@ map' :: (a -> b) -> [a] -> [b]
 map' f = foldr (\x acc -> f x : acc) []
 
 myFoldl :: (a -> b -> a) -> a -> [b] -> a
-myFoldl f base xs = foldr (\x acc -> f acc x) base (reverse xs)
+myFoldl f base xs = foldr (flip f) base (reverse xs)
 
 -- ********** Exercise 4 **********
 
 sieveSundaram :: Integer -> [Integer]
-sieveSundaram n = map (\x -> 2 * x + 1) $ [1 .. n] \\ cartProd n
+sieveSundaram n = map (\x -> 2 * x + 1) $ [1 .. k] \\ cartProd k
   where
+    k = (n - 2) `div` 2
     cartProd n = [x + y + (2 * x * y) | x <- [1 .. n], y <- [1 .. n], x < y]
