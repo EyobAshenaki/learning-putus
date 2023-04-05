@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ImportQualifiedPost #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -7,7 +8,7 @@ module Homework1 where
 
 import Plutus.V2.Ledger.Api qualified as PlutusV2
 import PlutusTx (compile)
-import PlutusTx.Prelude (Bool (..), BuiltinData)
+import PlutusTx.Prelude (Bool (..), BuiltinData, Eq ((==)), traceIfFalse, ($))
 import Utilities (wrapValidator)
 
 ---------------------------------------------------------------------------------------------------
