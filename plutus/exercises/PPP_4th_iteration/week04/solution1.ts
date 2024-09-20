@@ -1,0 +1,172 @@
+import {
+  Data,
+  Lucid,
+  Blockfrost,
+  getAddressDetails,
+  SpendingValidator,
+  TxHash,
+  Datum,
+  UTxO,
+  Address,
+  AddressDetails
+} from 'https://deno.land/x/lucid@0.9.1/mod.ts';
+// create a seed.ts file with your seed
+import { secretSeed } from '../lecture/seed.js';
+
+const DEADLINE = '2023-04-19T00:00:00.000Z';
+
+// set blockfrost endpoint
+const lucid = await Lucid.new(
+  new Blockfrost(
+    'https://cardano-preview.blockfrost.io/api/v0',
+    'preview4TQ3xclSLB24amtUORoldXUTGxwi2zAG'
+  ),
+  'Preview'
+);
+
+// load local stored seed as a wallet into lucid
+const selectFirstWallet = () => lucid.selectWalletFromSeed(secretSeed);
+const selectSecondWallet = () =>
+  lucid.selectWalletFromSeed(secretSeed, {
+    accountIndex: 1
+  });
+
+selectFirstWallet();
+const addr1: Address = await lucid.wallet.address();
+selectSecondWallet();
+const addr2: Address = await lucid.wallet.address();
+
+// Define the mistery script
+const misteryScript: SpendingValidator = {
+  type: 'PlutusV2',
+  script:
+    '590b9a590b970100003232323322323232323232323232323322323322323232323233322232323232323223232322232325335323232325335533553353300d500135004222003102b13357389201172a2a2a4e6f74205369676e6564206279204246312a2a2a0002a1533535355001222222222222005223232350012235005225333533350170060040021533500315335001103210331032103310323350143502a3500722200102e5014102b133573892011f2a2a2a546f6f206c6174652c20646561646c696e65207061737365642a2a2a0002a102a102b1533553353300d500135004222002102b1335738921172a2a2a4e6f74205369676e6564206279204246322a2a2a0002a15335323232350012235002225333533350160073502e006002153350011031103210311032355003222222222222005350052220015012102b1335738921252a2a2a546f6f206561726c792c20646561646c696e65206e6f7420726561636865642a2a2a0002a102a135001220023333573466e1cd55cea80224000466442466002006004646464646464646464646464646666ae68cdc39aab9d500c480008cccccccccccc88888888888848cccccccccccc00403403002c02802402001c01801401000c008cd408c090d5d0a80619a8118121aba1500b33502302535742a014666aa04eeb94098d5d0a804999aa813bae502635742a01066a0460606ae85401cccd5409c0c5d69aba150063232323333573466e1cd55cea801240004664424660020060046464646666ae68cdc39aab9d5002480008cc8848cc00400c008cd40edd69aba15002303d357426ae8940088c98c80fccd5ce02102081e89aab9e5001137540026ae854008c8c8c8cccd5cd19b8735573aa0049000119a81319a81dbad35742a004607a6ae84d5d1280111931901f99ab9c04204103d135573ca00226ea8004d5d09aba2500223263203b33573807c07a07226aae7940044dd50009aba1500533502375c6ae854010ccd5409c0b48004d5d0a801999aa813bae200135742a004605e6ae84d5d1280111931901b99ab9c03a039035135744a00226ae8940044d5d1280089aba25001135744a00226ae8940044d5d1280089aba25001135744a00226ae8940044d55cf280089baa00135742a008603e6ae84d5d1280211931901499ab9c02c02b0273333573466e1cd55ce9baa0054800080a88c98c80a0cd5ce0158150131999ab9a3370e6aae75401d2000233322212333001004003002375c6ae85401cdd71aba15006375a6ae84d5d1280311931901399ab9c02a029025102813263202633573892010350543500028135573ca00226ea80044d5d1280089aab9e500113754002446a004444444444444a66a666aa601e2400264246600244a66a004420062002004a03e4a66a666ae68cdc780700081681609a8108008a810002108168815990009aa8101108911299a80089a80191000910999a802910011802001199aa9803890008028020008911191919192999a80310a999a80310a999a80410980224c26006930a999a80390980224c2600693080788068a999a80390980224c26006930a999a80310980224c260069308070a999a80290806080688058a999a80290a999a803909802a4c26008930a999a803109802a4c2600893080708060a999a803109802a4c26008930a999a802909802a4c2600893080692999a80290a999a80390a999a80390999a8058050010008b0b0b08068a999a80310a999a80310999a8050048010008b0b0b0806080592999a80210a999a80310a999a80310999a8050048010008b0b0b08060a999a80290a999a80290999a8048040010008b0b0b0805880512999a80190a999a80290a999a80290999a8048040010008b0b0b08058a999a80210a999a80210999a8040038010008b0b0b0805080492999a80110a999a80210a999a80210999a8040038010008b0b0b08050a999a80190a999a80190999a8038030010008b0b0b08048804091a8009111111100389109198008018010891999999980091199ab9a3370e00400203803644a66a666ae68cdc380100080e00d88030a99a999ab9a337120040020380362008200a44666ae68cdc400100080e00d91199ab9a3371200400203803644666ae68cdc480100080d80e11199ab9a3371000400203603844a66a666ae68cdc480100080e00d8800880111299a999ab9a33712004002038036200420022444006244400424440022464460046eb0004c8004d5406488cccd55cf80092805119a80498021aba1002300335744004032464646666ae68cdc39aab9d5002480008cc8848cc00400c008c038d5d0a80118029aba135744a004464c6402e66ae700680640544d55cf280089baa0012323232323333573466e1cd55cea8022400046666444424666600200a0080060046464646666ae68cdc39aab9d5002480008cc8848cc00400c008c05cd5d0a80119a80780b1aba135744a004464c6403866ae7007c0780684d55cf280089baa00135742a008666aa010eb9401cd5d0a8019919191999ab9a3370ea0029002119091118010021aba135573ca00646666ae68cdc3a80124004464244460020086eb8d5d09aab9e500423333573466e1d400d20002122200323263201e33573804204003803603426aae7540044dd50009aba1500233500b75c6ae84d5d1280111931900c19ab9c01b01a016135744a00226ae8940044d55cf280089baa0011335500175ceb44488c88c008dd5800990009aa80b11191999aab9f00225008233500733221233001003002300635573aa004600a6aae794008c010d5d100180b89aba100111220021221223300100400312232323333573466e1d400520002350073005357426aae79400c8cccd5cd19b875002480089401c8c98c804ccd5ce00b00a80880809aab9d5001137540022424460040062244002464646666ae68cdc3a800a400c46424444600800a600e6ae84d55cf280191999ab9a3370ea004900211909111180100298049aba135573ca00846666ae68cdc3a801a400446424444600200a600e6ae84d55cf280291999ab9a3370ea00890001190911118018029bae357426aae7940188c98c8044cd5ce00a00980780700680609aab9d500113754002464646666ae68cdc39aab9d5002480008cc8848cc00400c008c014d5d0a8011bad357426ae8940088c98c8034cd5ce00800780589aab9e5001137540024646666ae68cdc39aab9d5001480008dd71aba135573ca004464c6401666ae700380340244dd5000919191919191999ab9a3370ea002900610911111100191999ab9a3370ea004900510911111100211999ab9a3370ea00690041199109111111198008048041bae35742a00a6eb4d5d09aba2500523333573466e1d40112006233221222222233002009008375c6ae85401cdd71aba135744a00e46666ae68cdc3a802a400846644244444446600c01201060186ae854024dd71aba135744a01246666ae68cdc3a8032400446424444444600e010601a6ae84d55cf280591999ab9a3370ea00e900011909111111180280418071aba135573ca018464c6402866ae7005c05804804404003c0380340304d55cea80209aab9e5003135573ca00426aae7940044dd50009191919191999ab9a3370ea002900111999110911998008028020019bad35742a0086eb4d5d0a8019bad357426ae89400c8cccd5cd19b875002480008c8488c00800cc020d5d09aab9e500623263200d33573802001e01601426aae75400c4d5d1280089aab9e500113754002464646666ae68cdc3a800a400446424460020066eb8d5d09aab9e500323333573466e1d400920002321223002003375c6ae84d55cf280211931900519ab9c00d00c008007135573aa00226ea8004488c8c8cccd5cd19b87500148010848880048cccd5cd19b875002480088d401cc018d5d09aab9e500423333573466e1d400d20002122200223263200b33573801c01a01201000e26aae7540044dd500089091118018021191999ab9a3370ea0029001100311999ab9a3370ea0049000100311931900319ab9c009008004003135573a6ea800526122002122001120014910350543100112323001001223300330020020011'
+};
+// Get the mistery address from the mistery script
+const misteryAddress: Address = lucid.utils.validatorToAddress(misteryScript);
+console.log('Script address: ', misteryAddress);
+
+// Create the mistery datum type
+const MisteryDatum = Data.Object({
+  beneficiary1: Data.String,
+  beneficiary2: Data.String,
+  deadline: Data.BigInt
+});
+type MisteryDatum = Data.Static<typeof MisteryDatum>;
+
+// Set the deadline date for the mistery script
+const deadlineDate: Date = new Date(DEADLINE);
+const deadlinePosIx = BigInt(deadlineDate.getTime());
+console.log('Time: ', deadlinePosIx);
+
+// Set the beneficiaries for the mistery script
+const beneficiary1Details: AddressDetails = getAddressDetails(addr1);
+const beneficiary1PKH: string = beneficiary1Details.paymentCredential.hash;
+// console.log(beneficiary1Details);
+
+const beneficiary2Details: AddressDetails = getAddressDetails(addr2);
+const beneficiary2PKH: string = beneficiary2Details.paymentCredential.hash;
+
+// Create datum for the mistery script with the beneficiaries and deadline
+const misteryDatum: MisteryDatum = {
+  beneficiary1: beneficiary1PKH,
+  beneficiary2: beneficiary2PKH,
+  deadline: deadlinePosIx
+};
+
+// An async function to send an amt of lovelace to a script with the above datum
+const sendToMisteryScript = async (amt: BigInt): Promise<TxHash> => {
+  const datum: Datum = Data.to<MisteryDatum>(misteryDatum, MisteryDatum);
+  const tx = await lucid
+    .newTx()
+    .payToContract(misteryAddress, { inline: datum }, { lovelace: amt })
+    .complete();
+
+  // ?? It takes sth of type C.Transaction, but I don't know how to get that type and returns sth of type C.TransactionWitnessSet
+  // const walletSigned = lucid.wallet.signTx(tx);
+
+  const signedTx = await tx.sign().complete();
+  const txHash = await signedTx.submit();
+  return txHash;
+};
+
+const grabFromMisteryScript = async (pkh): Promise<TxHash> => {
+  const dtm: Datum = Data.to<MisteryDatum>(misteryDatum, MisteryDatum);
+  const utxoAtMisteryScript: UTxO[] = await lucid.utxosAt(misteryAddress);
+  const validUtxo: UTxO[] = utxoAtMisteryScript.filter(
+    (utxo) => utxo.datum == dtm
+  );
+  // console.log('All UTxO: ', utxoAtMisteryScript);
+  console.log('Valid UTxO: ', validUtxo);
+
+  if (validUtxo && validUtxo.length > 0) {
+    const tx = await lucid
+      .newTx()
+      .collectFrom(validUtxo, Data.void())
+      .addSignerKey(pkh)
+      .attachSpendingValidator(misteryScript)
+      .validFrom(Date.now())
+      // .validTo(Date.now() + 60000)
+      .complete();
+    const signedTx = await tx.sign().complete();
+    const txHash = await signedTx.submit();
+    return txHash;
+  } else return 'No valid UTXO found';
+};
+
+const totalAmount = async (): Promise<{ amt: number; lovelace: BigInt }> => {
+  const utxos: UTxO[] = await lucid.utxosAt(misteryAddress);
+  const total = utxos.reduce((acc, utxo) => acc + utxo.assets.lovelace, 0n);
+  return {
+    amt: utxos.length,
+    lovelace: total
+  };
+};
+
+const spend = async (amt, walletNo) => {
+  if (walletNo == 1) {
+    selectFirstWallet();
+  } else if (walletNo == 2) {
+    selectSecondWallet();
+  }
+
+  const txHash = await sendToMisteryScript(BigInt(amt));
+  console.log(
+    'Sent ',
+    amt,
+    ' to ',
+    misteryAddress,
+    ' from wallet ',
+    walletNo,
+    ' with txHash: ',
+    txHash
+  );
+};
+
+const collect = async (walletNo) => {
+  console.log('Selected Wallet: ', await lucid.wallet.address(), '\n');
+
+  let grabTxHash = '';
+
+  if (walletNo == 1) {
+    selectFirstWallet();
+    grabTxHash = await grabFromMisteryScript(beneficiary1PKH);
+  } else if (walletNo == 2) {
+    selectSecondWallet();
+    grabTxHash = await grabFromMisteryScript(beneficiary2PKH);
+  }
+
+  console.log(
+    'Grabbed from ',
+    misteryAddress,
+    ' from wallet ',
+    walletNo,
+    ' with txHash: ',
+    grabTxHash
+  );
+};
+
+console.log(await totalAmount());
+
+// spend(1000000, 1);
+collect(2);
